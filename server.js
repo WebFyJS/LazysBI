@@ -2,11 +2,13 @@ import express from 'express';
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import bcrypt from 'bcrypt';
+import cors from 'cors';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
+app.use(cors());
 
 const users = [
     { id: 1, username: 'admin', password: '$2b$10$H5xg/OGC3LE8yG6owXO8i.EwNHDULrblPKuqjJlY9iylw1Y9H1gRi' } // senha: "password"
@@ -35,11 +37,11 @@ passport.use(new LocalStrategy(
 
 app.use(passport.initialize());
 
-app.post('/login', passport.authenticate('local'), (req, res) => {
+app.post('/api/login', passport.authenticate('local'), (req, res) => {
     res.json({ message: 'Login bem-sucedido' });
 });
 
-app.get('/protegida', passport.authenticate('local'), (req, res) => {
+app.get('/api/protegida', passport.authenticate('local'), (req, res) => {
     res.json({ message: 'Você está autenticado!' });
 });
 
