@@ -4,13 +4,19 @@ import LocalStrategy from 'passport-local';
 import bcrypt from 'bcrypt';
 import session from 'express-session'; 
 import jwt from 'jsonwebtoken';
-//import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+let revokedTokens = [];
 
-//app.use(cors());
+const apiLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000,
+    max: 100,
+});
+
 app.use(express.json());
+app.use("/api/", apiLimiter);
 app.use(session({
     secret: 'JrFHRr3LPEHDvs6ixYGky',
     resave: false,
@@ -61,7 +67,6 @@ app.post('/api/login', passport.authenticate('local'), (req, res) => {
     res.json({ message: 'Login bem-sucedido', token: token });
 });
 
-// Endpoint para verificar o status de autenticação do usuário
 app.get('/api/authenticated', (req, res) => {
     if (req.isAuthenticated()) {
         res.json({ authenticated: true });
@@ -69,6 +74,19 @@ app.get('/api/authenticated', (req, res) => {
         res.json({ authenticated: false });
     }
 });
+
+app.post('/api/revoketoken', (req, res) => {
+    const { token } = req.body;
+
+    if (revokedTokens.includes(token)) {
+        return res.status(400).json({ message: 'O token já foi revogado.' });
+    }
+
+    revokedTokens.push(token);
+
+    return res.json({ message: 'Token revogado com sucesso.' });
+});
+
 
 app.get('/api/data', (req, res) => {
     const data = { message: 'Dados da API RESTful' };
