@@ -1,15 +1,11 @@
 import React from 'react';
 
-interface HomeProps {
-  onLogout: () => void;
-}
-
-const Home: React.FC<HomeProps> = ({ onLogout }) => {
+const Home: React.FC = () => {
   return (
     <div>
       <h2>Página Inicial</h2>
       <p>Bem-vindo à página inicial!</p>
-      <button onClick={onLogout}>Logout</button>
+      <button>Logout</button>
     </div>
   );
 };

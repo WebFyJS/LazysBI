@@ -2,29 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-interface LoginProps {
-    onLogin: () => void;
-}
-
-const Login: React.FC<LoginProps> = ({ onLogin }) => {
-    const [verificado, setverificado] = useState(false);
+const Login: React.FC = () => {
+    const [verificado, setVerificado] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-
     const navigate = useNavigate();
 
     useEffect(() => {
-        checkAuthentication();
+       checkAuthentication();
     }, []);
 
     const checkAuthentication = async () => {
         try {
-            const response = await axios.get('/api/authenticated');
-            if (response.data.authenticated) {
-                navigate('/');
-            }else{
-                setverificado(true);
+            if(!verificado){
+                setVerificado(true);
+
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    return;
+                }
+
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                const response = await axios.get('/api/authenticated');
+
+                if (response.data.authenticated) {
+                    navigate('/');
+                }
             }
         } catch (error) {
             console.error('Erro ao verificar autenticação:', error);
@@ -34,8 +38,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     const handleLogin = async () => {
         try {
             const response = await axios.post('/api/login', { username, password });
-            console.log(response.data);
-            onLogin();
+            const token = response.data.token;
+            localStorage.setItem('token', token);
             navigate('/');
         } catch (error) {
             setError('Nome de usuário ou senha inválidos.');
@@ -43,23 +47,20 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         }
     };
 
-    return (<>
-            {verificado ? (
+    return (
+        <div>
+            <h2>Login</h2>
+            {error && <div>{error}</div>}
             <div>
-                <h2>Login</h2>
-                {error && <div>{error}</div>}
-                <div>
-                    <label>Usuário:</label>
-                    <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
-                </div>
-                <div>
-                    <label>Senha:</label>
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                </div>
-                <button onClick={handleLogin}>Login</button>
+                <label>Usuário:</label>
+                <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
             </div>
-            ) : null}
-        </>
+            <div>
+                <label>Senha:</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </div>
+            <button onClick={handleLogin}>Login</button>
+        </div>
     );
 };
 

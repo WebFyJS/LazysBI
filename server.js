@@ -3,6 +3,7 @@ import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import bcrypt from 'bcrypt';
 import session from 'express-session'; 
+import jwt from 'jsonwebtoken';
 //import cors from 'cors';
 
 const app = express();
@@ -56,7 +57,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.post('/api/login', passport.authenticate('local'), (req, res) => {
-    res.json({ message: 'Login bem-sucedido' });
+    const token = jwt.sign({ userId: req.user.id }, 'secreto', { expiresIn: '1h' });
+    res.json({ message: 'Login bem-sucedido', token: token });
 });
 
 // Endpoint para verificar o status de autenticação do usuário
