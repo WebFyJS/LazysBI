@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
 import Login from './Telas/Login';
-import Home from './Home'; // Importe seu componente Home (ou qualquer outra rota protegida) aqui
+import Home from './Telas/Home';
 
 const App: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -15,16 +15,16 @@ const App: React.FC = () => {
     };
 
     return (
-        <Router>
-            <Switch>
-                <Route path="/login">
-                    {isLoggedIn ? <Redirect to="/" /> : <Login onLogin={handleLogin} />}
-                </Route>
-                <Route path="/">
-                    {isLoggedIn ? <Home onLogout={handleLogout} /> : <Redirect to="/login" />}
-                </Route>
-            </Switch>
-        </Router>
+      <Router>
+        <Switch>
+          <Route path="/login">
+            {isLoggedIn ? <Redirect to="/" /> : <Login onLogin={handleLogin} />}
+          </Route>
+          <Route path="/">
+            {isLoggedIn ? <Home onLogout={handleLogout} /> : <Redirect to="/login" />}
+          </Route>
+        </Switch>
+      </Router>
     );
 };
 
