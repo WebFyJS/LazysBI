@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
 interface AuthValidationProps {
@@ -8,6 +8,8 @@ interface AuthValidationProps {
 
 const AuthValidation: React.FC<AuthValidationProps> = ({ children }) => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const checkAuthentication = async () => {
@@ -17,18 +19,27 @@ const AuthValidation: React.FC<AuthValidationProps> = ({ children }) => {
                     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                     const response = await axios.get('/api/authenticated');
                     if (!response.data.authenticated) {
-                        navigate('/login');
+                        localStorage.setItem('loadUrl', location.pathname);
+                        navigate('/login', { state: { from: location.pathname } });
                     }
                 } else {
-                    navigate('/login');
+                    localStorage.setItem('loadUrl', location.pathname);
+                    navigate('/login', { state: { from: location.pathname } });
                 }
             } catch (error) {
                 console.error('Erro ao verificar autenticação:', error);
+                // Lidar com o erro, exibir mensagem ou outra ação necessária
+            } finally {
+                setIsLoading(false);
             }
         };
 
         checkAuthentication();
-    }, [navigate]);
+    }, [navigate, location.pathname]);
+
+    if (isLoading) {
+        return <div>Carregando...</div>;
+    }
 
     return <>{children}</>;
 };

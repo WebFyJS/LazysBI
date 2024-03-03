@@ -40,7 +40,14 @@ const Login: React.FC = () => {
             const response = await axios.post('/api/login', { username, password });
             const token = response.data.token;
             localStorage.setItem('token', token);
-            navigate('/');
+
+            const loadUrl = localStorage.getItem('loadUrl');
+            if (loadUrl) {
+                localStorage.removeItem('loadUrl');
+                navigate(loadUrl);
+            }else{
+                navigate('/');
+            }
         } catch (error) {
             setError('Nome de usuário ou senha inválidos.');
             console.error('Erro ao fazer login:', error);
