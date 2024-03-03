@@ -1,35 +1,31 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
+import Login from './Telas/Login';
+import Home from './Home'; // Importe seu componente Home (ou qualquer outra rota protegida) aqui
 
-function App() {
-  const [count, setCount] = useState(0)
+const App: React.FC = () => {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    const handleLogin = () => {
+        setIsLoggedIn(true);
+    };
 
-export default App
+    const handleLogout = () => {
+        setIsLoggedIn(false);
+    };
+
+    return (
+        <Router>
+            <Switch>
+                <Route path="/login">
+                    {isLoggedIn ? <Redirect to="/" /> : <Login onLogin={handleLogin} />}
+                </Route>
+                <Route path="/">
+                    {isLoggedIn ? <Home onLogout={handleLogout} /> : <Redirect to="/login" />}
+                </Route>
+            </Switch>
+        </Router>
+    );
+};
+
+export default App;
