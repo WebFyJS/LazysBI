@@ -2,20 +2,36 @@ import express from 'express';
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import bcrypt from 'bcrypt';
-import cors from 'cors';
+import session from 'express-session'; 
+//import cors from 'cors';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+//app.use(cors());
 app.use(express.json());
-app.use(cors());
+app.use(session({
+    secret: 'JrFHRr3LPEHDvs6ixYGky',
+    resave: false,
+    saveUninitialized: false
+}));
 
 const users = [
-    { id: 1, username: 'admin', password: '$2b$10$H5xg/OGC3LE8yG6owXO8i.EwNHDULrblPKuqjJlY9iylw1Y9H1gRi' } // senha: "password"
+    { id: 1, username: 'admin', password: '$2b$10$JrFHRr3LPEHDvs6ixYGky.3vyRExLBcM9XLt.de/jo9Z5zOG.OU6e' } // senha: "password"
 ];
+
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+    const user = users.find(user => user.id === id);
+    done(null, user);
+});
 
 passport.use(new LocalStrategy(
     async (username, password, done) => {
+
         try {
             const user = users.find(u => u.username === username);
 
@@ -24,6 +40,7 @@ passport.use(new LocalStrategy(
             }
 
             const passwordMatch = await bcrypt.compare(password, user.password);
+
             if (!passwordMatch) {
                 return done(null, false, { message: 'Senha inválida.' });
             }
@@ -36,13 +53,19 @@ passport.use(new LocalStrategy(
 ));
 
 app.use(passport.initialize());
+app.use(passport.session());
 
 app.post('/api/login', passport.authenticate('local'), (req, res) => {
     res.json({ message: 'Login bem-sucedido' });
 });
 
-app.get('/api/protegida', passport.authenticate('local'), (req, res) => {
-    res.json({ message: 'Você está autenticado!' });
+// Endpoint para verificar o status de autenticação do usuário
+app.get('/api/authenticated', (req, res) => {
+    if (req.isAuthenticated()) {
+        res.json({ authenticated: true });
+    } else {
+        res.json({ authenticated: false });
+    }
 });
 
 app.get('/api/data', (req, res) => {
