@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import s from './login.module.css'
 import axios from 'axios';
 
 const Login: React.FC = () => {
@@ -10,12 +11,12 @@ const Login: React.FC = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-       checkAuthentication();
+        checkAuthentication();
     }, []);
 
     const checkAuthentication = async () => {
         try {
-            if(!verificado){
+            if (!verificado) {
                 setVerificado(true);
 
                 const token = localStorage.getItem('token');
@@ -45,7 +46,7 @@ const Login: React.FC = () => {
             if (loadUrl) {
                 localStorage.removeItem('loadUrl');
                 navigate(loadUrl);
-            }else{
+            } else {
                 navigate('/');
             }
         } catch (error) {
@@ -55,19 +56,21 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div>
-            <h2>Login</h2>
-            {error && <div>{error}</div>}
-            <div>
-                <label>Usuário:</label>
-                <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
+        <form >
+            <div className={s.login}>
+                <h2>Acesse sua conta</h2>
+                <div className={s.form_login_group}>
+                    <label>Usuário:</label>
+                    <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
+                </div>
+                <div className={s.form_login_group}>
+                    <label>Senha:</label>
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                </div>
+                {error && <div>{error}</div>}
+                <button type='button' onClick={handleLogin}>Login</button>
             </div>
-            <div>
-                <label>Senha:</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            </div>
-            <button onClick={handleLogin}>Login</button>
-        </div>
+        </form>
     );
 };
 
