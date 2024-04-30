@@ -2,9 +2,10 @@ import express from 'express';
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import bcrypt from 'bcrypt';
-import session from 'express-session'; 
+import session from 'express-session';
 import jwt from 'jsonwebtoken';
 import rateLimit from 'express-rate-limit';
+import cors from 'cors';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -15,7 +16,25 @@ const apiLimiter = rateLimit({
     max: 100,
 });
 
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+});
+
 app.use(express.json());
+app.use(cors({
+    origin: '*',
+    optionsSuccessStatus: 200
+}))
+
+
+app.get('/', (req, res) => {
+
+    return res.json({ msg: 'hello world!' })
+})
+
 app.use("/api/", apiLimiter);
 app.use(session({
     secret: 'JrFHRr3LPEHDvs6ixYGky',
@@ -24,7 +43,7 @@ app.use(session({
 }));
 
 const users = [
-    { id: 1, username: 'admin', password: '$2b$10$JrFHRr3LPEHDvs6ixYGky.3vyRExLBcM9XLt.de/jo9Z5zOG.OU6e' } // senha: "password"
+    { id: 1, username: 'admin', password: '$2a$12$9MID1m2tjALasdP.BoGQ5.wUEb5BQOruGa27yDcBZgHw.lKYgLk1m' } // senha: "password"
 ];
 
 passport.serializeUser((user, done) => {
@@ -37,17 +56,18 @@ passport.deserializeUser((id, done) => {
 });
 
 passport.use(new LocalStrategy(
-    async (username, password, done) => {
 
+    async (username, password, done) => {
         try {
             const user = users.find(u => u.username === username);
 
+            console.log(user);
             if (!user) {
                 return done(null, false, { message: 'Nome de usuário inválido.' });
             }
 
             const passwordMatch = await bcrypt.compare(password, user.password);
-
+            console.log(password);
             if (!passwordMatch) {
                 return done(null, false, { message: 'Senha inválida.' });
             }
@@ -64,7 +84,9 @@ app.use(passport.session());
 
 app.post('/api/login', passport.authenticate('local'), (req, res) => {
     const token = jwt.sign({ userId: req.user.id }, 'secreto', { expiresIn: '1h' });
+
     res.json({ message: 'Login bem-sucedido', token: token });
+
 });
 
 app.get('/api/authenticated', (req, res) => {
