@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import s from './login.module.css'
-import axios from 'axios';
+import { api } from '../../config/api';
 
 const Login: React.FC = () => {
     const [verificado, setVerificado] = useState(false);
@@ -24,8 +24,8 @@ const Login: React.FC = () => {
                     return;
                 }
 
-                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                const response = await axios.get('/api/authenticated');
+                api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                const response = await api.get('/api/authenticated');
 
                 if (response.data.authenticated) {
                     navigate('/');
@@ -38,7 +38,7 @@ const Login: React.FC = () => {
 
     const handleLogin = async () => {
         try {
-            const response = await axios.post('/api/login', { username, password });
+            const response = await api.post('/api/login', { username, password });
             const token = response.data.token;
             localStorage.setItem('token', token);
 

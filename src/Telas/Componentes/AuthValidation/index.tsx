@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import { api } from '../../../config/api';
 
 interface AuthValidationProps {
     children: React.ReactNode;
@@ -16,8 +16,8 @@ const AuthValidation: React.FC<AuthValidationProps> = ({ children }) => {
             try {
                 const token = localStorage.getItem('token');
                 if (token) {
-                    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                    const response = await axios.get('/api/authenticated');
+                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                    const response = await api.get('/api/authenticated');
                     if (!response.data.authenticated) {
                         localStorage.setItem('loadUrl', location.pathname);
                         navigate('/login', { state: { from: location.pathname } });
