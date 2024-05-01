@@ -1,11 +1,11 @@
 import express from 'express';
 import passport from 'passport';
-import LocalStrategy from 'passport-local';
-import bcrypt from 'bcrypt';
 import session from 'express-session';
-import jwt from 'jsonwebtoken';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
+import UserController from './backend/app/controllers/UserController.js';
+import { loginPassportMiddleware, AuthMiddleware  } from './backend/app/middlewares/auth.js';
+import { secret } from './backend/app/config/env.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -29,22 +29,11 @@ app.use(cors({
     optionsSuccessStatus: 200
 }))
 
-
-app.get('/', (req, res) => {
-
-    return res.json({ msg: 'hello world!' })
-})
-
-app.use("/api/", apiLimiter);
 app.use(session({
-    secret: 'JrFHRr3LPEHDvs6ixYGky',
+    secret: secret,
     resave: false,
     saveUninitialized: false
 }));
-
-const users = [
-    { id: 1, username: 'admin', password: '$2a$12$9MID1m2tjALasdP.BoGQ5.wUEb5BQOruGa27yDcBZgHw.lKYgLk1m' } // senha: "password"
-];
 
 passport.serializeUser((user, done) => {
     done(null, user.id);
@@ -55,39 +44,23 @@ passport.deserializeUser((id, done) => {
     done(null, user);
 });
 
-passport.use(new LocalStrategy(
-
-    async (username, password, done) => {
-        try {
-            const user = users.find(u => u.username === username);
-
-            console.log(user);
-            if (!user) {
-                return done(null, false, { message: 'Nome de usuário inválido.' });
-            }
-
-            const passwordMatch = await bcrypt.compare(password, user.password);
-            console.log(password);
-            if (!passwordMatch) {
-                return done(null, false, { message: 'Senha inválida.' });
-            }
-
-            return done(null, user);
-        } catch (error) {
-            return done(error);
-        }
-    }
-));
+passport.use(loginPassportMiddleware);
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.post('/api/login', passport.authenticate('local'), (req, res) => {
-    const token = jwt.sign({ userId: req.user.id }, 'secreto', { expiresIn: '1h' });
 
-    res.json({ message: 'Login bem-sucedido', token: token });
+app.get('/', (req, res) => res.json({ msg: 'hello world!' }))
 
-});
+app.get('/test', UserController.index)
+
+app.get('/api', (req, res)=>res.json('api'))
+
+app.use("/api/", apiLimiter);
+
+app.post('/api/login', passport.authenticate('local'), UserController.login);
+
+app.use(AuthMiddleware)
 
 app.get('/api/authenticated', (req, res) => {
     if (req.isAuthenticated()) {
