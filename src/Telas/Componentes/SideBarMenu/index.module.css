@@ -1,0 +1,23 @@
+.main {
+    width: 200px;
+    background-color: rgb(42, 42, 42);
+    height: 100%;
+    padding: 10px;
+}
+
+.panels_container {
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+    gap: 8px;
+}
+
+.panels_container>button {
+    background-color: transparent;
+    border: 1px solid rgb(26, 26, 26);
+}
+
+.panels_container>button:hover {
+    background-color: rgb(26, 26, 26);
+    border: 1px solid rgb(26, 26, 26);
+}

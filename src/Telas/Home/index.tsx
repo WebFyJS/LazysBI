@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import SideBarMenu from '../Componentes/SideBarMenu';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -20,10 +21,9 @@ const Home: React.FC = () => {
   return (
 
     
-    <div>
-      <h2>Página Inicial</h2>
-      <p>Bem-vindo à página inicial!</p>
-      <button onClick={logOut}>Logout</button>
+    <div style={{height: '100vh', width: '100vw'}}>
+      {/* <h1>Bem - vindo ao Lazy BI</h1> */}
+      <SideBarMenu/>
     </div>
   );
 };
